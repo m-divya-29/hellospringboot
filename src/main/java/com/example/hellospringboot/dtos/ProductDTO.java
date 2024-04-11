@@ -1,15 +1,15 @@
-package com.example.hellospringboot.models;
+package com.example.hellospringboot.dtos;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class Product {
+public class ProductDTO {
     private Long id;
     private String title;
-    private Category category;
+    private String category;
     private String description;
-    private String imageURL;
+    private String image;
     private Double price;
 }

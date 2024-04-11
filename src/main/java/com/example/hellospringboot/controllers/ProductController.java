@@ -1,6 +1,8 @@
 package com.example.hellospringboot.controllers;
 
 import com.example.hellospringboot.models.Product;
+import com.example.hellospringboot.services.IProductService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -10,6 +12,13 @@ import java.util.List;
 @RequestMapping("/products")
 public class ProductController {
 
+    IProductService productService;
+
+    @Autowired
+    ProductController(IProductService productService) {
+        this.productService = productService;
+    }
+
     @GetMapping("")
     public List<Product> getAllProducts() {
         return new ArrayList<>();
@@ -17,8 +26,7 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public Product getProductById(@PathVariable Long id) {
-        Product product = new Product();
-        return product;
+        return productService.getProductById(id);
     }
 
     @PostMapping("")
