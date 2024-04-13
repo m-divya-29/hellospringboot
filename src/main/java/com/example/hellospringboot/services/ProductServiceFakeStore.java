@@ -1,6 +1,8 @@
 package com.example.hellospringboot.services;
 
+import ch.qos.logback.core.model.processor.ProcessorException;
 import com.example.hellospringboot.dtos.FakeProductDTO;
+import com.example.hellospringboot.exceptions.ProductNotExistsException;
 import com.example.hellospringboot.models.Category;
 import com.example.hellospringboot.models.Product;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,10 +50,14 @@ public class ProductServiceFakeStore implements IProductService {
         return fakeProductDTO;
     }
 
-    public Product getProductById(Long id) {
+    public Product getProductById(Long id) throws ProductNotExistsException {
+
         FakeProductDTO fakeProductDTO = restTemplate.getForObject(
                 FAKESTOREAPI_PRODUCTS + id,
                 FakeProductDTO.class);
+        if(fakeProductDTO == null) {
+            throw new ProductNotExistsException("Product with ID: " +id + " does not exist");
+        }
         return convertProductDTOToProduct(fakeProductDTO);
     }
 

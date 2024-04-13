@@ -1,8 +1,12 @@
 package com.example.hellospringboot.controllers;
 
+import com.example.hellospringboot.dtos.ExceptionDTO;
+import com.example.hellospringboot.exceptions.ProductNotExistsException;
 import com.example.hellospringboot.models.Product;
 import com.example.hellospringboot.services.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -25,7 +29,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public Product getProductById(@PathVariable Long id) {
+    public Product getProductById(@PathVariable Long id) throws ProductNotExistsException {
         return productService.getProductById(id);
     }
 
@@ -37,6 +41,18 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public void deleteProduct(@PathVariable Long id) {
 
+    }
+
+    /**
+     * Local ProductNotExistsException handler
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(ProductNotExistsException.class)
+    public ResponseEntity<ExceptionDTO> handleProductNotExistsException(ProductNotExistsException e) {
+        ExceptionDTO dto = new ExceptionDTO();
+        dto.setMessage(e.getMessage());
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
 }
