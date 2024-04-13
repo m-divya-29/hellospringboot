@@ -1,7 +1,6 @@
 package com.example.hellospringboot.controllers;
 
 import com.example.hellospringboot.models.Category;
-import com.example.hellospringboot.models.Product;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +19,7 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public Category getCategoryById(@PathVariable Long id) {
+    public Category getProductInCategory(@PathVariable Long id) {
         return new Category();
     }
 

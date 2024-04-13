@@ -1,12 +1,12 @@
 package com.example.hellospringboot.services;
 
-import ch.qos.logback.core.model.processor.ProcessorException;
 import com.example.hellospringboot.dtos.FakeProductDTO;
 import com.example.hellospringboot.exceptions.ProductNotExistsException;
 import com.example.hellospringboot.models.Category;
 import com.example.hellospringboot.models.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpMessageConverterExtractor;
@@ -17,17 +17,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class ProductServiceFakeStore implements IProductService {
+public class FakeStoreProductService implements IProductService {
 
     public static final String FAKESTOREAPI_PRODUCTS = "https://fakestoreapi.com/products/";
     RestTemplate restTemplate;
 
     @Autowired
-    ProductServiceFakeStore(RestTemplate restTemplate) {
+    FakeStoreProductService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
-    private Product convertProductDTOToProduct(FakeProductDTO fakeProductDTO) {
+    private Product convertFakeProductDTOToProduct(FakeProductDTO fakeProductDTO) {
         Product product = new Product();
         product.setId(fakeProductDTO.getId());
         product.setTitle(fakeProductDTO.getTitle());
@@ -50,23 +50,22 @@ public class ProductServiceFakeStore implements IProductService {
         return fakeProductDTO;
     }
 
-    public Product getProductById(Long id) throws ProductNotExistsException {
-
+    public ResponseEntity<Product> getProductById(Long id) throws ProductNotExistsException {
         FakeProductDTO fakeProductDTO = restTemplate.getForObject(
                 FAKESTOREAPI_PRODUCTS + id,
                 FakeProductDTO.class);
         if(fakeProductDTO == null) {
             throw new ProductNotExistsException("Product with ID: " +id + " does not exist");
         }
-        return convertProductDTOToProduct(fakeProductDTO);
+        return new ResponseEntity<>(convertFakeProductDTOToProduct(fakeProductDTO), HttpStatus.OK);
     }
 
-    public Product addNewProduct(Product product) {
-       ResponseEntity<FakeProductDTO> fakeProductDTO = restTemplate.postForEntity(FAKESTOREAPI_PRODUCTS, convertProductToFakeProductDto(product), FakeProductDTO.class);
-       return convertProductDTOToProduct(fakeProductDTO.getBody());
+    public ResponseEntity<Product> addNewProduct(FakeProductDTO product) {
+       ResponseEntity<FakeProductDTO> fakeProductDTO = restTemplate.postForEntity(FAKESTOREAPI_PRODUCTS, product, FakeProductDTO.class);
+       return new ResponseEntity<>(convertFakeProductDTOToProduct(fakeProductDTO.getBody()), HttpStatus.OK);
     }
 
-    public List<Product> getAllProducts() {
+    public List<ResponseEntity<Product>> getAllProducts() {
         /* This does not work - java type erasure!
         List<FakeProductDTO> allProducts = restTemplate.getForObject(FAKESTOREAPI_PRODUCTS, List.class);
         List<Product> products = new ArrayList<>();
@@ -75,9 +74,9 @@ public class ProductServiceFakeStore implements IProductService {
         }
          */
         FakeProductDTO[] productDTOS = restTemplate.getForObject(FAKESTOREAPI_PRODUCTS, FakeProductDTO[].class);
-        List<Product> products = new ArrayList<>();
+        List<ResponseEntity<Product>> products = new ArrayList<>();
         for (FakeProductDTO fakeProductDTO : productDTOS) {
-            products.add(convertProductDTOToProduct(fakeProductDTO));
+            products.add(new ResponseEntity<>(convertFakeProductDTOToProduct(fakeProductDTO), HttpStatus.OK));
         }
         return products;
     }
@@ -93,6 +92,36 @@ public class ProductServiceFakeStore implements IProductService {
         HttpMessageConverterExtractor<FakeProductDTO> responseExtractor =
                 new HttpMessageConverterExtractor<>(FakeProductDTO.class, restTemplate.getMessageConverters());
         FakeProductDTO fakeProductDTO = restTemplate.execute(FAKESTOREAPI_PRODUCTS + id, HttpMethod.PATCH, requestCallback, responseExtractor);
-        return convertProductDTOToProduct(fakeProductDTO);
+        return convertFakeProductDTOToProduct(fakeProductDTO);
     }
+
+    /**
+     * Delete a product and return the product object.
+     */
+    @Override
+    public ResponseEntity<Product> deleteProductById(Long id) throws ProductNotExistsException {
+        RequestCallback requestCallback = restTemplate.httpEntityCallback(null, FakeProductDTO.class);
+        HttpMessageConverterExtractor<FakeProductDTO> responseExtractor =
+                new HttpMessageConverterExtractor<>(FakeProductDTO.class, restTemplate.getMessageConverters());
+        FakeProductDTO fakeProductDTO = restTemplate.execute(FAKESTOREAPI_PRODUCTS + id, HttpMethod.DELETE, requestCallback, responseExtractor);
+        if(fakeProductDTO == null) {
+            throw new ProductNotExistsException("Product with ID: " + id + " does not exist");
+        }
+        return new ResponseEntity<>(convertFakeProductDTOToProduct(fakeProductDTO), HttpStatus.OK);
+    }
+
+    /**
+     * Update a product by replacing it.
+     */
+    @Override
+    public ResponseEntity<Product> replaceProductById(Long id, FakeProductDTO product) throws ProductNotExistsException {
+        RequestCallback requestCallback = restTemplate.httpEntityCallback(product, FakeProductDTO.class);
+        HttpMessageConverterExtractor<FakeProductDTO> responseExtractor = new HttpMessageConverterExtractor<>(FakeProductDTO.class, restTemplate.getMessageConverters());
+        FakeProductDTO fakeProductDTO = restTemplate.execute(FAKESTOREAPI_PRODUCTS +id, HttpMethod.PUT, requestCallback, responseExtractor);
+        if(fakeProductDTO == null) {
+            throw new ProductNotExistsException("Product with ID: " + id + " does not exist");
+        }
+        return new ResponseEntity<>(convertFakeProductDTOToProduct(fakeProductDTO), HttpStatus.OK);
+    }
+
 }
