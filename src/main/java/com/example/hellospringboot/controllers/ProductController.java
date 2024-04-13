@@ -21,7 +21,7 @@ public class ProductController {
 
     @GetMapping("")
     public List<Product> getAllProducts() {
-        return new ArrayList<>();
+        return productService.getAllProducts();
     }
 
     @GetMapping("/{id}")
@@ -31,7 +31,7 @@ public class ProductController {
 
     @PostMapping("")
     public Product addNewProduct(@RequestBody Product product) {
-        return new Product();
+        return productService.addNewProduct(product);
     }
 
     @DeleteMapping("/{id}")
