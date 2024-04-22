@@ -1,11 +1,12 @@
 package com.example.hellospringboot.controllers;
 
 import com.example.hellospringboot.dtos.ExceptionDTO;
-import com.example.hellospringboot.dtos.FakeProductDTO;
+import com.example.hellospringboot.dtos.ProductDTO;
 import com.example.hellospringboot.exceptions.ProductNotExistsException;
 import com.example.hellospringboot.models.Product;
 import com.example.hellospringboot.services.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ public class ProductController {
     IProductService productService;
 
     @Autowired
-    ProductController(IProductService productService) {
+    ProductController( @Qualifier("selfProductService")IProductService productService) {
         this.productService = productService;
     }
 
@@ -44,7 +45,7 @@ public class ProductController {
      * Add a new product
      */
     @PostMapping("")
-    public ResponseEntity<Product> addNewProduct(@RequestBody FakeProductDTO product) {
+    public ResponseEntity<Product> addNewProduct(@RequestBody Product product) {
         return productService.addNewProduct(product);
     }
 
@@ -60,7 +61,7 @@ public class ProductController {
      * Update a product
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody FakeProductDTO product) throws ProductNotExistsException {
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody ProductDTO product) throws ProductNotExistsException {
        return productService.replaceProductById(id,product);
     }
 
