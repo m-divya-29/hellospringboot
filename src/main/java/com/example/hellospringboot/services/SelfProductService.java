@@ -1,11 +1,11 @@
 package com.example.hellospringboot.services;
 
-import com.example.hellospringboot.dtos.ProductDTO;
 import com.example.hellospringboot.exceptions.ProductNotExistsException;
 import com.example.hellospringboot.models.Category;
 import com.example.hellospringboot.models.Product;
 import com.example.hellospringboot.repositories.ICategoryRepository;
 import com.example.hellospringboot.repositories.IProductRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,19 +53,36 @@ public class SelfProductService implements IProductService{
     public List<ResponseEntity<Product>> getAllProducts() {
         List<Product> products = productRepository.findAll();
         List<ResponseEntity<Product>> responses = new ArrayList<>();
+        if(products.isEmpty()) {
+            responses.add(new ResponseEntity<>(HttpStatus.NO_CONTENT));
+            return responses;
+        }
+
         for(Product product : products) {
             responses.add(new ResponseEntity<>(product, HttpStatus.OK));
         }
         return responses;
     }
 
+    @Transactional
     @Override
     public ResponseEntity<Product> deleteProductById(Long id) throws ProductNotExistsException {
-        return null;
+        Product product = productRepository.deleteProductById(id);
+        return new ResponseEntity<>(product, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Product> replaceProductById(Long id, ProductDTO product) throws ProductNotExistsException {
-        return null;
+    public ResponseEntity<Product> replaceProductById(Long id, Product product) throws ProductNotExistsException {
+        Product foundProduct = productRepository.save(product);
+        return new ResponseEntity<>(foundProduct, HttpStatus.OK);
+    }
+    @Override
+    public List<ResponseEntity<Product>> findProductInCategory(Long id) {
+        List<Product> foundProducts = productRepository.findByCategoryId(id);
+        List<ResponseEntity<Product>> responses = new ArrayList<>();
+        for (Product product : foundProducts) {
+            responses.add(new ResponseEntity<>(product, HttpStatus.OK));
+        }
+        return responses;
     }
 }

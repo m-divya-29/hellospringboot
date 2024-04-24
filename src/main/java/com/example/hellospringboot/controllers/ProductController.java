@@ -1,7 +1,6 @@
 package com.example.hellospringboot.controllers;
 
 import com.example.hellospringboot.dtos.ExceptionDTO;
-import com.example.hellospringboot.dtos.ProductDTO;
 import com.example.hellospringboot.exceptions.ProductNotExistsException;
 import com.example.hellospringboot.models.Product;
 import com.example.hellospringboot.services.IProductService;
@@ -44,7 +43,7 @@ public class ProductController {
     /**
      * Add a new product
      */
-    @PostMapping("")
+    @PostMapping("/")
     public ResponseEntity<Product> addNewProduct(@RequestBody Product product) {
         return productService.addNewProduct(product);
     }
@@ -61,7 +60,7 @@ public class ProductController {
      * Update a product
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody ProductDTO product) throws ProductNotExistsException {
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product) throws ProductNotExistsException {
        return productService.replaceProductById(id,product);
     }
 
@@ -73,5 +72,15 @@ public class ProductController {
         ExceptionDTO dto = new ExceptionDTO();
         dto.setMessage(e.getMessage());
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
+
+    /**
+     * Get products in a category.
+     * @param id
+     * @return
+     */
+    @GetMapping("/category/{id}")
+    public List<ResponseEntity<Product>> getProductInCategory(@PathVariable Long id) {
+        return productService.findProductInCategory(id);
     }
 }

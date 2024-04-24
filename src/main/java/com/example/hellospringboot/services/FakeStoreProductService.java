@@ -92,14 +92,19 @@ public class FakeStoreProductService implements IProductService {
      * Update a product by replacing it.
      */
     @Override
-    public ResponseEntity<Product> replaceProductById(Long id, ProductDTO product) throws ProductNotExistsException {
-        RequestCallback requestCallback = restTemplate.httpEntityCallback(product, ProductDTO.class);
-        HttpMessageConverterExtractor<ProductDTO> responseExtractor = new HttpMessageConverterExtractor<>(ProductDTO.class, restTemplate.getMessageConverters());
-        ProductDTO productDTO = restTemplate.execute(FAKESTOREAPI_PRODUCTS +id, HttpMethod.PUT, requestCallback, responseExtractor);
-        if(productDTO == null) {
+    public ResponseEntity<Product> replaceProductById(Long id, Product product) throws ProductNotExistsException {
+        RequestCallback requestCallback = restTemplate.httpEntityCallback(product, Product.class);
+        HttpMessageConverterExtractor<Product> responseExtractor = new HttpMessageConverterExtractor<>(Product.class, restTemplate.getMessageConverters());
+        Product foundProduct = restTemplate.execute(FAKESTOREAPI_PRODUCTS +id, HttpMethod.PUT, requestCallback, responseExtractor);
+        if(foundProduct == null) {
             throw new ProductNotExistsException("Product with ID: " + id + " does not exist");
         }
-        return new ResponseEntity<>(ProductUtils.convertProductDTOToProduct(productDTO), HttpStatus.OK);
+        return new ResponseEntity<>(foundProduct, HttpStatus.OK);
+    }
+
+    @Override
+    public List<ResponseEntity<Product>> findProductInCategory(Long id) {
+        return List.of();
     }
 
 }
