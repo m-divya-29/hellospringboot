@@ -10,7 +10,7 @@ public class HelloController {
         return "Hello " + name;
     }
     //@GetMapping
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(value = "/hello", method = RequestMethod.GET)
     public String test(){
         return "test";
     }
